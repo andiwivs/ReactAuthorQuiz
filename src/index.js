@@ -72,8 +72,34 @@ const getTurnData = authors => {
 };
 
 const state = {
-  turnData: getTurnData(authors)
+  turnData: getTurnData(authors),
+  highlight: "none"
 };
 
-ReactDOM.render(<AuthorQuiz {...state} />, document.getElementById("root"));
+// const [gameState, setGameState] = useState({
+//   turnData: getTurnData(authors),
+//   highlight: "none"
+// });
+
+const onAnswerSelected = answer => {
+  const isCorrect = state.turnData.author.books.some(book => book === answer);
+
+  // const newGameState = { ...gameState };
+  // newGameState.highlight = isCorrect ? "correct" : "wrong";
+  // setGameState(newGameState);
+
+  state.highlight = isCorrect ? "correct" : "wrong";
+
+  render();
+};
+
+const render = () => {
+  ReactDOM.render(
+    <AuthorQuiz {...state} onAnswerSelected={onAnswerSelected} />,
+    document.getElementById("root")
+  );
+};
+
+render();
+
 serviceWorker.unregister();
