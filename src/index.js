@@ -1,11 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route, withRouter } from "react-router-dom";
 import { shuffle, sample } from "underscore";
 import AuthorQuiz from "./AuthorQuiz";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
-import "./AddAuthorForm";
+import AddAuthorForm from "./AddAuthorForm";
 
 const authors = [
   {
@@ -73,10 +73,14 @@ const getTurnData = authors => {
   };
 };
 
-const state = {
-  turnData: getTurnData(authors),
-  highlight: "none"
+const resetState = () => {
+  return {
+    turnData: getTurnData(authors),
+    highlight: "none"
+  };
 };
+
+let state = resetState();
 
 // const [gameState, setGameState] = useState({
 //   turnData: getTurnData(authors),
@@ -95,29 +99,44 @@ const onAnswerSelected = answer => {
   render();
 };
 
-const AddAuthorForm = ({ match }) => {
-  return (
-    <div className="add-author-form">
-      <h1>Add Author</h1>
-      <form>
-        <div className="form-input">
-          <label htmlFor="name">Name</label>
-          <input type="text" name="name" />
-        </div>
-      </form>
-    </div>
-  );
+const zzAddAuthorFormWrapper = () => {
+  // the purpose of this wrapper component is to allow the router to render a component that does not rely on props, wrapping one that does
+  // ie <Route path="/add" component={AddAuthorFormWrapper} />
+
+  const addAuthorHandler = author => {
+    authors.push(author);
+  };
+
+  return <AddAuthorForm onAddAuthor={addAuthorHandler} />;
 };
 
+const AddAuthorFormWrapper = withRouter(({ history }) => (
+  <AddAuthorForm
+    onAddAuthor={author => {
+      authors.push(author);
+      history.push("/");
+    }}
+  />
+));
+
 const App = () => {
-  return <AuthorQuiz {...state} onAnswerSelected={onAnswerSelected} />;
+  return (
+    <AuthorQuiz
+      {...state}
+      onAnswerSelected={onAnswerSelected}
+      onContinue={() => {
+        state = resetState();
+        render();
+      }}
+    />
+  );
 };
 
 const render = () => {
   ReactDOM.render(
     <BrowserRouter>
       <Route exact path="/" component={App} />
-      <Route path="/add" component={AddAuthorForm} />
+      <Route path="/add" component={AddAuthorFormWrapper} />
     </BrowserRouter>,
     document.getElementById("root")
   );
