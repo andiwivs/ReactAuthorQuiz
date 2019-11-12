@@ -42,7 +42,7 @@ const Turn = ({ author, books, highlight, onAnswerSelected }) => {
   );
 };
 
-Turn.protoTypes = {
+Turn.propTypes = {
   author: PropTypes.shape({
     name: PropTypes.string.isRequired,
     imageUrl: PropTypes.string.isRequired,
