@@ -109,7 +109,12 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-let store = Redux.createStore(reducer);
+let store = Redux.createStore(
+  reducer,
+  // this argument enables the Chrome / FF extension "Redux DevTools" to work
+  // see https://github.com/zalmoxisus/redux-devtools-extension
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
 
 ReactDOM.render(
   <ReactRedux.Provider store={store}>
