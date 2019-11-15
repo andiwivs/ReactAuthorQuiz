@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import "./bootstrap.min.css";
 import "./AuthorQuiz.css";
@@ -46,7 +47,7 @@ Turn.propTypes = {
   author: PropTypes.shape({
     name: PropTypes.string.isRequired,
     imageUrl: PropTypes.string.isRequired,
-    imageSource: PropTypes.string.isRequired,
+    imageSource: PropTypes.string,
     books: PropTypes.arrayOf(PropTypes.string).isRequired
   }),
   books: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -104,7 +105,28 @@ const Footer = () => {
   );
 };
 
-const AuthorQuiz = ({ turnData, highlight, onAnswerSelected, onContinue }) => {
+const mapStateToProps = state => {
+  return {
+    turnData: state.turnData,
+    highlight: state.highlight
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onAnswerSelected: answer => {
+      dispatch({ type: "ANSWER_SELECTED", answer });
+    },
+    onContinue: () => {
+      dispatch({ type: "CONTINUE" });
+    }
+  };
+};
+
+const AuthorQuiz = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(({ turnData, highlight, onAnswerSelected, onContinue }) => {
   return (
     <div className="container-fluid">
       <Hero />
@@ -120,6 +142,6 @@ const AuthorQuiz = ({ turnData, highlight, onAnswerSelected, onContinue }) => {
       <Footer />
     </div>
   );
-};
+});
 
 export default AuthorQuiz;

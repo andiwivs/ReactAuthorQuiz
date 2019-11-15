@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { connect } from "react-redux";
+import { withRouter } from "react-router-dom";
 import "./AddAuthorForm.css";
 
 const AddAuthorForm = ({ match, onAddAuthor }) => {
@@ -16,7 +18,7 @@ const AddAuthorForm = ({ match, onAddAuthor }) => {
     setFormState(newFormState);
   };
 
-  const onAddBook = event => {
+  const onAddBook = () => {
     const newFormState = Object.assign({}, formState, {
       books: formState.books.concat(formState.bookTemp),
       bookTemp: ""
@@ -70,4 +72,19 @@ const AddAuthorForm = ({ match, onAddAuthor }) => {
   );
 };
 
-export default AddAuthorForm;
+const mapStateToProps = () => {
+  return {};
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    onAddAuthor: author => {
+      dispatch({ type: "ADD_AUTHOR", author });
+      props.history.push("/");
+    }
+  };
+};
+
+export default withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(AddAuthorForm)
+);

@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, withRouter } from "react-router-dom";
+import { BrowserRouter, Route } from "react-router-dom";
+
+import * as Redux from "redux";
+import * as ReactRedux from "react-redux";
+
 import { shuffle, sample } from "underscore";
 import AuthorQuiz from "./AuthorQuiz";
 import "./index.css";
@@ -73,75 +77,48 @@ const getTurnData = authors => {
   };
 };
 
-const resetState = () => {
-  return {
-    turnData: getTurnData(authors),
-    highlight: "none"
-  };
+const initialState = {
+  authors,
+  turnData: getTurnData(authors),
+  highlight: ""
 };
 
-let state = resetState();
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "ANSWER_SELECTED":
+      const isCorrect = state.turnData.author.books.some(
+        book => book === action.answer
+      );
+      return Object.assign({}, state, {
+        highlight: isCorrect ? "correct" : "wrong"
+      });
 
-// const [gameState, setGameState] = useState({
-//   turnData: getTurnData(authors),
-//   highlight: "none"
-// });
+    case "CONTINUE":
+      return Object.assign({}, state, {
+        turnData: getTurnData(state.authors),
+        highlight: ""
+      });
 
-const onAnswerSelected = answer => {
-  const isCorrect = state.turnData.author.books.some(book => book === answer);
+    case "ADD_AUTHOR":
+      return Object.assign({}, state, {
+        authors: state.authors.concat([action.author])
+      });
 
-  // const newGameState = { ...gameState };
-  // newGameState.highlight = isCorrect ? "correct" : "wrong";
-  // setGameState(newGameState);
-
-  state.highlight = isCorrect ? "correct" : "wrong";
-
-  render();
+    default:
+      return state;
+  }
 };
 
-const zzAddAuthorFormWrapper = () => {
-  // the purpose of this wrapper component is to allow the router to render a component that does not rely on props, wrapping one that does
-  // ie <Route path="/add" component={AddAuthorFormWrapper} />
+let store = Redux.createStore(reducer);
 
-  const addAuthorHandler = author => {
-    authors.push(author);
-  };
-
-  return <AddAuthorForm onAddAuthor={addAuthorHandler} />;
-};
-
-const AddAuthorFormWrapper = withRouter(({ history }) => (
-  <AddAuthorForm
-    onAddAuthor={author => {
-      authors.push(author);
-      history.push("/");
-    }}
-  />
-));
-
-const App = () => {
-  return (
-    <AuthorQuiz
-      {...state}
-      onAnswerSelected={onAnswerSelected}
-      onContinue={() => {
-        state = resetState();
-        render();
-      }}
-    />
-  );
-};
-
-const render = () => {
-  ReactDOM.render(
+ReactDOM.render(
+  <ReactRedux.Provider store={store}>
     <BrowserRouter>
-      <Route exact path="/" component={App} />
-      <Route path="/add" component={AddAuthorFormWrapper} />
-    </BrowserRouter>,
-    document.getElementById("root")
-  );
-};
-
-render();
+      <Route exact path="/" component={AuthorQuiz} />
+      <Route path="/add" component={AddAuthorForm} />
+    </BrowserRouter>
+  </ReactRedux.Provider>,
+  document.getElementById("root")
+);
 
 serviceWorker.unregister();
